@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import re
 import sys
 import time
@@ -563,6 +564,11 @@ def _cli_main() -> None:
         "--output",
         help="Output path for the markdown results file.",
     )
+    parser.add_argument(
+        "--headed",
+        action="store_true",
+        help="Show the browser window instead of running headless.",
+    )
     args = parser.parse_args()
 
     # Check Playwright availability
@@ -596,9 +602,12 @@ def _cli_main() -> None:
 
     with sync_playwright() as pw:
         # launch_persistent_context saves cookies + localStorage to disk
+        # Headless by default. --headed (or SCRAPER_HEADED=1) opens a visible
+        # browser, for when LinkedIn treats the headless browser differently.
+        headed = args.headed or os.environ.get("SCRAPER_HEADED") == "1"
         context = pw.chromium.launch_persistent_context(
             str(user_data_dir),
-            headless=True,  # headless=False crashes when run from shell without display
+            headless=not headed,  # headed needs a display; fine when launched from the Command Center
             viewport={"width": 1280, "height": 900},
         )
         page = context.new_page()
@@ -609,8 +618,30 @@ def _cli_main() -> None:
         # Give cookies a moment to settle
         page.wait_for_timeout(3000)
 
-        login_state = page.evaluate(LOGIN_CHECK_JS)
-        if not login_state.get("loggedIn"):
+        # Logged in = LinkedIn's li_at session cookie is present and LinkedIn
+        # didn't bounce us to a login, auth wall or checkpoint page. The DOM
+        # check is only a fallback: its selectors date from early 2026 and
+        # LinkedIn's markup changes, which made it report "logged out" while
+        # the session was fine.
+        cookies = context.cookies("https://www.linkedin.com")
+        has_session_cookie = any(c.get("name") == "li_at" for c in cookies)
+        bounced = any(k in page.url for k in ("/login", "/authwall", "/checkpoint", "/uas/"))
+        if has_session_cookie and not bounced:
+            logged_in = True
+        else:
+            logged_in = bool(page.evaluate(LOGIN_CHECK_JS).get("loggedIn")) and not bounced
+
+        if not logged_in:
+            debug_png = Path(__file__).parent.parent / "jobs" / "scraper_login_debug.png"
+            try:
+                debug_png.parent.mkdir(parents=True, exist_ok=True)
+                page.screenshot(path=str(debug_png))
+            except Exception:
+                debug_png = None
+            print(f"Login check: li_at cookie {'present' if has_session_cookie else 'missing'}, "
+                  f"landed on {page.url[:120]} (title: {page.title()[:80]})")
+            if debug_png:
+                print(f"Screenshot of what LinkedIn showed: {debug_png}")
             print(
                 "LinkedIn session not detected in headless mode. "
                 "Session may have expired. Run `python pipeline/auth_linkedin.py`, "
