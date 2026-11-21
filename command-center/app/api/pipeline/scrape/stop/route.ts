@@ -7,26 +7,34 @@ export const dynamic = 'force-dynamic'
 
 const rootDir = path.resolve(process.cwd(), '..')
 const SENTINEL = path.join(rootDir, 'jobs', '.scraper_running')
+const STATUS_PATH = path.join(rootDir, 'jobs', 'scraper_status.json')
 
 // POST /api/pipeline/scrape/stop
-// Kills any python process running linkedin_scraper.py and cleans up the sentinel
+// Kills the scrape runner and any scraper it started, then records the stop
+// so the Jobs page (which watches scraper_status.json) leaves its running state.
 export async function POST() {
-  // Kill matching python processes via PowerShell (Windows-safe, targeted)
   await new Promise<void>(resolve => {
-    const proc = spawn(
-      'powershell',
-      [
-        '-NonInteractive', '-NoProfile', '-Command',
-        `Get-WmiObject Win32_Process | Where-Object { $_.CommandLine -like '*linkedin_scraper*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`,
-      ],
-      { shell: false },
-    )
+    const proc = process.platform === 'win32'
+      ? spawn(
+          'powershell',
+          [
+            '-NonInteractive', '-NoProfile', '-Command',
+            `Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*linkedin_scraper*' -or $_.CommandLine -like '*run_scrape.py*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`,
+          ],
+          { shell: false },
+        )
+      : spawn('pkill', ['-f', 'run_scrape.py|linkedin_scraper.py'], { shell: false })
     proc.on('close', () => resolve())
     proc.on('error', () => resolve())
   })
 
-  // Clean up sentinel file
   try { fs.unlinkSync(SENTINEL) } catch { /* already gone */ }
+  try {
+    const now = new Date().toISOString()
+    fs.writeFileSync(STATUS_PATH, JSON.stringify({
+      state: 'stopped', startedAt: now, finishedAt: now, queries: [], message: 'Scraper stopped.',
+    }, null, 2))
+  } catch { /* ok */ }
 
   return NextResponse.json({ ok: true })
 }

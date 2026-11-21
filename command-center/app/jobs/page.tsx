@@ -117,20 +117,12 @@ export default function JobsPage() {
     '/api/jobs/titles', fetcher
   )
 
+  // results_updated also fires for queue.json changes, so it only refreshes
+  // data. The end of a scrape is detected from the scraper's status file.
   useWS('results_updated', useCallback(() => {
     mutateQueue()
     mutateResults()
-    setScraping(false)
-    setScrapeOutput(prev => prev ? prev + '\n\nDone. Scroll down to see results.' : '')
   }, [mutateQueue, mutateResults]))
-
-  // Sync scraping state with server sentinel on mount
-  useEffect(() => {
-    fetch('/api/pipeline/scrape')
-      .then(r => r.json())
-      .then(d => { if (d.running) setScraping(true) })
-      .catch(() => {})
-  }, [])
 
   // ── Scraper state ────────────────────────────────────────────────
   const [selectedTitles, setSelectedTitles] = useState<string[]>([])
@@ -141,6 +133,51 @@ export default function JobsPage() {
   const [scrapeRemote, setScrapeRemote] = useState(true)
   const [scrapeEA, setScrapeEA] = useState(true)
   const [scrapeOutput, setScrapeOutput] = useState('')
+  const scrapingRef = useRef(false)
+  useEffect(() => { scrapingRef.current = scraping }, [scraping])
+
+  // Ask the server whether the scraper is still running. When it has stopped,
+  // show how the run ended (pipeline/run_scrape.py writes scraper_status.json
+  // whether it succeeded or not) and refresh the results.
+  const checkScrape = useCallback(async () => {
+    try {
+      const d = await fetch('/api/pipeline/scrape', { cache: 'no-store' }).then(r => r.json()) as {
+        running: boolean
+        status?: { state: string; message?: string } | null
+        log?: string
+      }
+      if (d.running) { setScraping(true); return }
+      if (!scrapingRef.current) return
+      setScraping(false)
+      mutateResults()
+      mutateQueue()
+      const st = d.status
+      if (!st) {
+        setScrapeOutput(prev => prev + '\n\nThe scraper stopped without reporting a result.' +
+          (d.log ? `\n\nLast output:\n${d.log}` : ''))
+      } else if (st.state === 'done') {
+        setScrapeOutput(`Done. ${st.message ?? ''} Scroll down to see results.`)
+      } else if (st.state === 'stopped') {
+        setScrapeOutput(prev => prev + '\n\nScraper stopped.')
+      } else {
+        setScrapeOutput(
+          `${st.state === 'no_results' ? 'No new results' : 'Scraper failed'}: ${st.message ?? ''}` +
+          (st.state === 'failed' && d.log ? `\n\nLast output:\n${d.log}` : ''),
+        )
+      }
+    } catch { /* server unreachable, try again on the next tick */ }
+  }, [mutateResults, mutateQueue])
+
+  useWS('scrape_finished', checkScrape)
+
+  // On mount, pick up a run already in progress. While a run is going, also
+  // poll, so the page finishes even if the live-update socket isn't connected.
+  useEffect(() => { checkScrape() }, [checkScrape])
+  useEffect(() => {
+    if (!scraping) return
+    const t = setInterval(checkScrape, 5000)
+    return () => clearInterval(t)
+  }, [scraping, checkScrape])
   const [analyzing, setAnalyzing] = useState(false)
 
   // ── Results selection state ──────────────────────────────────────
@@ -277,6 +314,7 @@ export default function JobsPage() {
 
   async function stopScraper() {
     await fetch('/api/pipeline/scrape/stop', { method: 'POST' })
+    scrapingRef.current = false
     setScraping(false)
     setScrapeOutput(prev => prev + '\n\nScraper stopped.')
   }

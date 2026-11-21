@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef, useCallback } from 'react'
 
-type WSEvent = 'tracker_updated' | 'qa_updated' | 'results_updated' | 'queue_updated'
+type WSEvent = 'tracker_updated' | 'qa_updated' | 'results_updated' | 'queue_updated' | 'scrape_finished'
 type Listener = (type: WSEvent) => void
 
 interface WSContextValue {

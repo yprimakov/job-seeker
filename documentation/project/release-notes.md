@@ -2,6 +2,18 @@
 
 ---
 
+## Unreleased: scraper always reports back
+
+### Jobs page scraper no longer hangs with no results
+
+- **Fixed: page never updating after a scrape.** The server watched a fixed list of file paths. chokidar loses a listed file that doesn't exist at startup or gets deleted (Clear results deletes `linkedin_results.md`), and the handler ignored `add` events, so new results never reached the page. It now watches the `jobs/` folder and handles both `add` and `change`.
+- **Fixed: silent failures.** An expired LinkedIn session, no job cards, a scoring error, or nothing to merge used to end the run without writing anything, and the terminal closed. **New: `pipeline/run_scrape.py`** runs every search, logs to `jobs/scraper_last_run.log`, and always writes `jobs/scraper_status.json` (`done`, `no_results`, `failed` or `stopped`) with a plain reason. The terminal stays open on failure.
+- **Jobs page:** stops the spinner when the status file lands (live update, plus a 5 s poll while running), and shows the reason and the last lines of output on failure.
+- **Launcher:** search titles go in a JSON spec file instead of the `.bat` command line, so titles with `&` or quotes can't break it. A second launch while one is running is refused, and a sentinel older than 45 min is treated as stale.
+- **`linkedin_scraper.py`:** exits with code 2 when the LinkedIn session is gone, and its message now points at `pipeline/auth_linkedin.py`.
+
+---
+
 ## v0.9.0 — 2026-03-17
 
 ### Full Cover Letter Generator (`pipeline/cover_letter.py`)

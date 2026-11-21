@@ -613,10 +613,11 @@ def _cli_main() -> None:
         if not login_state.get("loggedIn"):
             print(
                 "LinkedIn session not detected in headless mode. "
-                "Session may have expired. Re-run process_queue.py to refresh it."
+                "Session may have expired. Run `python pipeline/auth_linkedin.py`, "
+                "log in to LinkedIn in the window it opens, then run the scraper again."
             )
             context.close()
-            sys.exit(1)
+            sys.exit(2)  # run_scrape.py treats 2 as "not logged in" and stops early
 
         for page_num in range(1, args.pages + 1):
             # Wait for job cards to render
