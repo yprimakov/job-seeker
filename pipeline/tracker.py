@@ -8,7 +8,7 @@ Manages two CSV files:
 Usage:
     # Log a new application
     python tracker.py log --company "People In AI" --title "Principal AI Engineer" \\
-        --url "https://linkedin.com/jobs/view/..." --mode Remote --salary "$275K-$325K" \\
+        --url "https://linkedin.com/jobs/view/..." --mode Remote --salary "$XXXK-$YYYK" \\
         --easy-apply --resume-file "output/PeopleInAI_Principal_20260315.md"
 
     # Record an unknown question encountered during an application

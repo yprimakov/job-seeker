@@ -155,7 +155,7 @@ def run_followup(dry_run: bool = False):
         return
 
     service = _get_gmail_service()
-    sender_email = os.environ.get("CANDIDATE_EMAIL_BASE", "yprimakov") + "@" + os.environ.get("CANDIDATE_EMAIL_DOMAIN", "gmail.com")
+    sender_email = os.environ.get("CANDIDATE_EMAIL_BASE", "") + "@" + os.environ.get("CANDIDATE_EMAIL_DOMAIN", "gmail.com")
     created = 0
     for row in due:
         subject, body = _draft_body(row)

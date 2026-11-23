@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import re
 import sys
 import time
@@ -40,6 +41,10 @@ REPO_ROOT = Path(__file__).parent.parent
 TRACKER_FILE = REPO_ROOT / "jobs" / "application_tracker.csv"
 APPLICATIONS_DIR = REPO_ROOT / "applications"
 LINKEDIN_PROFILE = Path.home() / ".job-seeker-linkedin"
+# Salary answer for form fields, from .env (kept out of git).
+DESIRED_SALARY = os.environ.get("CANDIDATE_DESIRED_SALARY", "")
+# Phone for form fields, digits only, from .env.
+CANDIDATE_PHONE_DIGITS = "".join(ch for ch in os.environ.get("CANDIDATE_PHONE", "") if ch.isdigit())
 
 TRACKER_HEADERS = [
     "Date Applied", "Company", "Job Title", "LinkedIn URL", "Work Mode",
@@ -331,7 +336,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                             if (opts.length) { try { nativeSS.call(inp, opts[0].value); } catch(e) { inp.value = opts[0].value; } inp.dispatchEvent(new Event('change',{bubbles:true})); fixed++; }
                         } else if (!inp.value.trim()) {
                             const ctx = (inp.closest('div.fb-dash-form-element, fieldset')?.innerText || inp.getAttribute('aria-label') || '').toLowerCase();
-                            const v = inp.type === 'number' ? '10' : ctx.includes('year') ? '12' : ctx.includes('salary') ? '200000' : 'Yes';
+                            const v = inp.type === 'number' ? '10' : ctx.includes('year') ? '12' : ctx.includes('salary') ? '__DESIRED_SALARY__' : 'Yes';
                             try { if (inp.tagName === 'TEXTAREA') { nativeTA.call(inp, v); } else { nativeIS.call(inp, v); } } catch(e) { inp.value = v; }
                             inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); fixed++;
                         }
@@ -345,7 +350,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                     });
                     return fixed;
                 }
-            """)
+            """.replace("__DESIRED_SALARY__", DESIRED_SALARY).replace("__CANDIDATE_PHONE__", CANDIDATE_PHONE_DIGITS))
             if fixed:
                 print(f"    Step {step + 1}: Fixed {fixed} validation errors — retrying...")
                 page.wait_for_timeout(1000)
@@ -386,7 +391,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
             if phone_input.count() > 0:
                 val = phone_input.input_value()
                 if not val:
-                    phone_input.fill("7187576477")
+                    phone_input.fill(CANDIDATE_PHONE_DIGITS)
                     print(f"    Step {step + 1}: Filled phone number.")
         except Exception:
             pass
@@ -461,9 +466,9 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                         if (fullLabel.includes('year') && (fullLabel.includes('experience') || fullLabel.includes('work'))) {
                             setVal(inp, '12');
                         } else if (fullLabel.includes('salary') || fullLabel.includes('compensation') || fullLabel.includes('desired') || fullLabel.includes('rate') || fullLabel.includes('pay')) {
-                            setVal(inp, '200000');
+                            setVal(inp, '__DESIRED_SALARY__');
                         } else if (fullLabel.includes('phone') || fullLabel.includes('mobile')) {
-                            setVal(inp, '7187576477');
+                            setVal(inp, '__CANDIDATE_PHONE__');
                         } else if (fullLabel.includes('model') || fullLabel.includes('how many') || fullLabel.includes('number of')) {
                             setVal(inp, '10');
                         } else if (fullLabel.includes('refer') || fullLabel.includes('who') || fullLabel.includes('name')) {
@@ -473,7 +478,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                         } else if (inp.type === 'number') {
                             setVal(inp, '5');
                         } else if (inp.type === 'tel') {
-                            setVal(inp, '7187576477');
+                            setVal(inp, '__CANDIDATE_PHONE__');
                         } else if (inp.required || inp.getAttribute('aria-required') === 'true') {
                             setVal(inp, 'Available immediately');
                         }
@@ -492,7 +497,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                         inp.dispatchEvent(new Event('change', {bubbles: true}));
                     });
                 }
-            """)
+            """.replace("__DESIRED_SALARY__", DESIRED_SALARY).replace("__CANDIDATE_PHONE__", CANDIDATE_PHONE_DIGITS))
         except Exception:
             pass
 
@@ -557,10 +562,10 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                         if (!inp || (inp.value || '').trim() || inp.readOnly || inp.disabled) return;
                         let val = null;
                         if (ll.includes('year') && (ll.includes('experience') || ll.includes('work'))) val = '12';
-                        else if (ll.includes('salary') || ll.includes('compensation') || ll.includes('expected pay') || ll.includes('desired')) val = '200000';
+                        else if (ll.includes('salary') || ll.includes('compensation') || ll.includes('expected pay') || ll.includes('desired')) val = '__DESIRED_SALARY__';
                         else if (ll.includes('gpa') || ll.includes('grade')) val = '3.8';
                         else if (ll.includes('month') || ll.includes('notice period')) val = '2';
-                        else if (ll.includes('phone') || ll.includes('mobile')) val = '7187576477';
+                        else if (ll.includes('phone') || ll.includes('mobile')) val = '__CANDIDATE_PHONE__';
                         else if (ll.includes('linkedin') || ll.includes('profile url') || ll.includes('website') || ll.includes('portfolio')) val = 'https://www.linkedin.com/in/yuryprimakov';
                         else if (inp.type === 'number') val = '5';
                         if (val !== null) {
@@ -570,7 +575,7 @@ def submit_easy_apply(page, resume_pdf: Path, row: dict) -> bool:
                         }
                     });
                 }
-            """)
+            """.replace("__DESIRED_SALARY__", DESIRED_SALARY).replace("__CANDIDATE_PHONE__", CANDIDATE_PHONE_DIGITS))
         except Exception:
             pass
 

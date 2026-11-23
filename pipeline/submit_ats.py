@@ -449,7 +449,7 @@ def _submit_greenhouse(page, company: str, resume_pdf: Path) -> bool:
                         continue
                     label_lower = label.lower()
                     if any(k in label_lower for k in ["salary", "compensation", "pay"]):
-                        extra_text[qid] = "200000"
+                        extra_text[qid] = os.environ.get("CANDIDATE_DESIRED_SALARY", "")
                     elif any(k in label_lower for k in ["year", "experience"]):
                         extra_text[qid] = "15"
                     elif any(k in label_lower for k in ["linkedin", "profile", "url", "website", "portfolio"]):
@@ -748,7 +748,7 @@ def _submit_ashby(page, company: str, resume_pdf: Path) -> bool:
         elif any(k in label + name for k in ["current_company", "current company", "employer"]):
             fill_map[key] = PROFILE.get("current_employer", "")
         elif any(k in label + name for k in ["salary", "compensation", "pay"]):
-            fill_map[key] = "200000"
+            fill_map[key] = os.environ.get("CANDIDATE_DESIRED_SALARY", "")
         elif any(k in label + name for k in ["year", "experience"]):
             fill_map[key] = "15"
         elif any(k in label + name for k in ["cover", "letter"]):

@@ -1,7 +1,7 @@
 """
 Response Tracker
 ================
-Polls leoprime.dev@gmail.com for replies from applied companies and
+Polls the forwarding inbox (CANDIDATE_FORWARDING_EMAIL) for replies from applied companies and
 automatically updates application_tracker.csv with the response type
 and date received.
 
@@ -120,7 +120,7 @@ def _get_gmail_service():
 
 
 def _fetch_recent_emails(service, days_back: int = 30) -> list[dict]:
-    """Fetch emails received in the last N days from leoprime.dev@gmail.com."""
+    """Fetch emails received in the last N days from the forwarding inbox (CANDIDATE_FORWARDING_EMAIL)."""
     after = (datetime.now() - timedelta(days=days_back)).strftime("%Y/%m/%d")
     query = f"after:{after} -from:me -category:promotions -category:social"
 

@@ -11,9 +11,9 @@ Usage:
 
     # Fill all standard fields in one shot
     js = build_fill_script({
-        "first_name": "Yury",
-        "email":      "yprimakov+jobs-anthropic@gmail.com",
-        "question_13603703008": "yuryprimakov.com",
+        "first_name": "Jane",
+        "email":      "janesmith+jobs-acme@gmail.com",
+        "question_13603703008": "janesmith.com",
     })
     # → pass js to mcp__claude-in-chrome__javascript_tool
 

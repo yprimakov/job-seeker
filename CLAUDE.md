@@ -16,7 +16,7 @@ Yury Primakov (Principal AI Engineer, Holmdel NJ) is actively job hunting. This 
 - **Name:** Yury Primakov
 - **Title:** Principal AI Engineer
 - **Location:** Holmdel, NJ
-- **Email:** yprimakov@gmail.com | **Phone:** 718-757-6477
+- **Email and phone:** from `.env` (`CANDIDATE_EMAIL_BASE`, `CANDIDATE_EMAIL_DOMAIN`, `CANDIDATE_PHONE`), never committed
 - **Website:** yuryprimakov.com
 - **Experience:** 15+ years full-stack engineering, now specializing in applied AI
 - **Core strengths:** LLM integration, RAG systems, autonomous AI agents, agentic workflows, Python/FastAPI, Next.js/React, Docker/Kubernetes, C#/.NET
@@ -102,7 +102,7 @@ Manages two CSV files — the application log and the Q&A knowledge base.
 ```bash
 # Log a new application
 python pipeline/tracker.py log --company "People In AI" --title "Principal AI Engineer" \
-    --url "https://linkedin.com/jobs/view/..." --mode Remote --salary "$275K-$325K" \
+    --url "https://linkedin.com/jobs/view/..." --mode Remote --salary "$XXXK-$YYYK" \
     --easy-apply --resume-file "output/PeopleInAI_Principal_20260315.md"
 
 # Record a question you don't know how to answer during an application
@@ -148,7 +148,7 @@ The base resume (`pipeline/resume_base.md`) and all tailored outputs must follow
 ## Remote File Access
 
 ### here.now (temporary public links)
-- Account: yprimakov@gmail.com | API key: `~/.herenow/credentials`
+- Account: see `~/.herenow/credentials` (API key lives there)
 - **Default: always use `--ttl 86400` (expires in 24 hours).** Only omit `--ttl` if Yury explicitly asks for a permanent link.
 - Publish (default — 24hr expiry):
   ```bash
@@ -164,12 +164,7 @@ The base resume (`pipeline/resume_base.md`) and all tailored outputs must follow
 ### Google Drive (secure, private)
 Folder structure in Google Drive under **Job Search 2026**:
 
-| Folder | Drive ID |
-|--------|----------|
-| Job Search 2026 (root) | `1uxwotEEGih6XZHfEpVAteemHKcaa-k-b` |
-| Tailored Resumes | `19Gw4n_pkGc-sPLQgv-68vxQqAgfMOr20` |
-| Job Listings | `12MA306S-weSkRl1Ah7f9r51JBV169O2n` |
-| Tracker | `1i6B0AlDKgZkEAvrK_QICjajSEzAGlcHL` |
+Folder IDs live in the local `.env` (`DRIVE_FOLDER_ROOT`, `DRIVE_FOLDER_RESUMES`, `DRIVE_FOLDER_LISTINGS`, `DRIVE_FOLDER_TRACKER`), never in git. Folders: Job Search 2026 (root), Tailored Resumes, Job Listings, Tracker.
 
 Google Drive is accessible via the Zapier MCP integration (`mcp__claude_ai_Zapier__google_drive_*`).
 
@@ -177,15 +172,15 @@ Google Drive is accessible via the Zapier MCP integration (`mcp__claude_ai_Zapie
 
 ## Top Job Leads Found (2026-03-15)
 
-| # | Role | Company | Salary | Fit |
-|---|------|---------|--------|-----|
-| 1 | Principal AI Engineer | People In AI | $275K–$325K | ⭐⭐⭐⭐⭐ |
-| 2 | Staff ML/AI Engineer | D24 Search | $220K–$300K | ⭐⭐⭐⭐⭐ |
-| 3 | AI Solutions Engineer – GenAI & Agentic AI | techolution | — | ⭐⭐⭐⭐⭐ |
-| 4 | Senior Applied AI Eng / Tech Lead / Architect | Sectech Solutions | — | ⭐⭐⭐⭐ |
-| 5 | Founding AI Engineer | Pocket | $150K | ⭐⭐⭐⭐ |
-| 6 | AI Engineer | Hanalytica GmbH | $60/hr | ⭐⭐⭐ |
-| 7 | AI Engineer (P&C Insurance) | James Search Group | — | ⭐⭐⭐ |
+| # | Role | Company | Fit |
+|---|------|---------|-----|
+| 1 | Principal AI Engineer | People In AI | ⭐⭐⭐⭐⭐ |
+| 2 | Staff ML/AI Engineer | D24 Search | ⭐⭐⭐⭐⭐ |
+| 3 | AI Solutions Engineer – GenAI & Agentic AI | techolution | ⭐⭐⭐⭐⭐ |
+| 4 | Senior Applied AI Eng / Tech Lead / Architect | Sectech Solutions | ⭐⭐⭐⭐ |
+| 5 | Founding AI Engineer | Pocket | ⭐⭐⭐⭐ |
+| 6 | AI Engineer | Hanalytica GmbH | ⭐⭐⭐ |
+| 7 | AI Engineer (P&C Insurance) | James Search Group | ⭐⭐⭐ |
 
 Full details in `jobs/linkedin_results.md`.
 

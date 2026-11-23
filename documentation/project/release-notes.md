@@ -16,7 +16,7 @@
 
 - **Updated: `tracker.py`** — Added `Date Response Received` and `Response Type` columns to `TRACKER_HEADERS`. Added `log-response` command to manually record a response. Added `stats` command: response rate by work mode, easy apply vs direct, response type breakdown, average days to response.
 
-- **New: `pipeline/response_tracker.py`** — Polls `leoprime.dev@gmail.com` for replies from applied companies. Matches sender domain to company name using subdomain stripping + token overlap; handles ATS notification domains (Greenhouse, Lever, Workday, etc.) by extracting company name from Subject. Classifies responses (Phone Screen / Interview / Assessment / Offer / Rejected / Other) via Claude Haiku batch call. Updates tracker CSV in place. `--dry-run`, `--install` (Task Scheduler, daily at 09:05), `--setup` (Gmail OAuth).
+- **New: `pipeline/response_tracker.py`** — Polls the forwarding inbox for replies from applied companies. Matches sender domain to company name using subdomain stripping + token overlap; handles ATS notification domains (Greenhouse, Lever, Workday, etc.) by extracting company name from Subject. Classifies responses (Phone Screen / Interview / Assessment / Offer / Rejected / Other) via Claude Haiku batch call. Updates tracker CSV in place. `--dry-run`, `--install` (Task Scheduler, daily at 09:05), `--setup` (Gmail OAuth).
 
 ---
 
