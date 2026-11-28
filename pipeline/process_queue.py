@@ -31,6 +31,11 @@ try:
 except ImportError:
     pass
 
+sys.path.insert(0, str(Path(__file__).parent))
+import role_fit  # noqa: E402  (local, stdlib-only)
+
+import os
+
 REPO_ROOT = Path(__file__).parent.parent
 QUEUE_FILE = REPO_ROOT / "jobs" / "queue.json"
 TRACKER_FILE = REPO_ROOT / "jobs" / "application_tracker.csv"
@@ -222,9 +227,27 @@ def log_to_tracker(item: dict, folder: Path) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def _load_fit_criteria() -> dict | None:
+    """Role fit scoring is off unless ROLE_FIT_ENABLED=1. ROLE_FIT_CRITERIA
+    can point at a criteria JSON; otherwise role_fit.load_criteria() picks
+    pipeline/role_fit_criteria.json, then the example file."""
+    if os.environ.get("ROLE_FIT_ENABLED") != "1":
+        return None
+    path = os.environ.get("ROLE_FIT_CRITERIA")
+    criteria = role_fit.load_criteria(Path(path) if path else None)
+    print("Role fit scoring is on.")
+    return criteria
+
+
 def main() -> None:
     items = read_queue()
-    pending = [i for i in items if i.get("status") in ("pending", "failed")]
+    # Items the role fit scorer skipped stay "failed" so the UI shows them,
+    # but they are not retried. Clear "fitSkipped" to retry one.
+    pending = [
+        i for i in items
+        if i.get("status") in ("pending", "failed") and not i.get("fitSkipped")
+    ]
+    fit_criteria = _load_fit_criteria()
 
     if not pending:
         print("No pending items in the queue.")
@@ -256,6 +279,15 @@ def main() -> None:
                     "Page content too short — LinkedIn may require a fresh login. "
                     "Run the scraper once to refresh the session."
                 )
+
+            if fit_criteria is not None:
+                fit = role_fit.score_posting(jd_text, fit_criteria, title=item.get("title", ""))
+                item["fit"] = {"score": fit.score, "verdict": fit.verdict, "redFlags": fit.red_flags}
+                print(f"  Role fit: {fit.score}/100 ({fit.verdict})" + (f"; red flags: {'; '.join(fit.red_flags)}" if fit.red_flags else ""))
+                skip_below = fit_criteria.get("skip_below") or 0
+                if fit.score < skip_below:
+                    item["fitSkipped"] = True
+                    raise RuntimeError(f"Skipped by role fit: {fit.score}/100 is under skip_below {skip_below}")
 
             print(f"  JD extracted ({len(jd_text):,} chars). Running tailor_resume.py...")
 

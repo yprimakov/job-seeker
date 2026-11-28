@@ -1,0 +1,5 @@
+Senior Forward Deployed Engineer (Remote, US)
+Acme Robotics is hiring a Senior Forward Deployed Engineer to work directly with customers.
+This is a fully remote role. You will build LLM agents and RAG pipelines in Python and TypeScript,
+prototype integrations against customer APIs, and own customer-facing technical delivery.
+Compensation: $170,000 - $210,000 base plus equity.
