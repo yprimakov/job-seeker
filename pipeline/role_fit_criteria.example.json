@@ -1,0 +1,24 @@
+{
+  "_comment": "Example values only. Copy to role_fit_criteria.json (gitignored) and set your own.",
+  "role_keywords": {
+    "must_have_any": ["forward deployed engineer", "solutions engineer", "ai engineer", "applied ai", "ml engineer"],
+    "nice_to_have": ["llm", "agents", "rag", "python", "typescript", "customer-facing", "prototyping", "api"]
+  },
+  "work_mode": {
+    "accept": ["remote", "hybrid"],
+    "max_office_days": 2,
+    "office_locations": []
+  },
+  "compensation": {
+    "min_base_usd": 100000,
+    "penalize_missing": false
+  },
+  "seniority": {
+    "accept": ["senior", "staff", "principal", "lead"],
+    "reject": ["intern", "junior", "entry level", "associate"]
+  },
+  "avoid_keywords": ["mainframe", "cobol"],
+  "strong_at": 75,
+  "maybe_at": 50,
+  "skip_below": 0
+}

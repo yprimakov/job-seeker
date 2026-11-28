@@ -1,0 +1,4 @@
+Staff Solutions Engineer, Applied AI
+Example Health is looking for a Staff Solutions Engineer. Hybrid: 3 days per week in the office in Boston.
+Work with customers to design agents on our API, write Python, and run customer-facing workshops.
+Pay is not listed in this posting.

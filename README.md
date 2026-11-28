@@ -104,6 +104,22 @@ Output is saved to `applications/YYYYMMDD_CompanyName_JobTitle/`:
 
 ---
 
+## Role fit scoring (optional)
+
+`pipeline/role_fit.py` scores a job posting from 0 to 100 against your own criteria, with reasons and red flags (for example "In office 5 days a week" or "Pay tops out under your minimum"). It runs locally with no API call.
+
+```bash
+cp pipeline/role_fit_criteria.example.json pipeline/role_fit_criteria.json   # gitignored; edit it
+python pipeline/role_fit.py --jd posting.txt          # text report
+python pipeline/role_fit.py --jd posting.txt --json   # machine-readable
+```
+
+To score every queued job before tailoring, set `ROLE_FIT_ENABLED=1` (and optionally `ROLE_FIT_CRITERIA=path/to/criteria.json`). Each queue item gets a `fit` field. If `skip_below` is above 0 and a job scores under it, the job is not tailored. Its queue status is set to `failed` with a reason, and `fitSkipped` is set so that it is not retried. With the flag unset, the pipeline behaves as before.
+
+Tests: `python -m unittest discover pipeline/tests`
+
+---
+
 ## Command Center
 
 The Command Center is a Next.js web app (`command-center/`) that runs on `localhost:3000`. It provides:

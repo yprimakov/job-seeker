@@ -51,3 +51,6 @@ temp/
 # Pipeline debug artifacts
 pipeline/debug_*.py
 pipeline/debug_*.png
+
+# Personal role fit criteria (copy from role_fit_criteria.example.json)
+pipeline/role_fit_criteria.json
