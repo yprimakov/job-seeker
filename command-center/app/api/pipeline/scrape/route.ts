@@ -6,11 +6,38 @@ import fs from 'fs'
 export const dynamic = 'force-dynamic'
 
 const rootDir = path.resolve(process.cwd(), '..')
-const SENTINEL = path.join(rootDir, 'jobs', '.scraper_running')
+const JOBS_DIR = path.join(rootDir, 'jobs')
+const SENTINEL = path.join(JOBS_DIR, '.scraper_running')
+const STATUS_PATH = path.join(JOBS_DIR, 'scraper_status.json')
+const LOG_PATH = path.join(JOBS_DIR, 'scraper_last_run.log')
+const SPEC_PATH = path.join(JOBS_DIR, '.scraper_spec.json')
 
-// GET /api/pipeline/scrape — check if scraper is currently running
+// A sentinel older than this is left over from a run that was killed
+// (window closed, PC rebooted) and no longer means "running".
+const STALE_MS = 45 * 60 * 1000
+
+function isRunning(): boolean {
+  try {
+    const age = Date.now() - fs.statSync(SENTINEL).mtimeMs
+    if (age < STALE_MS) return true
+    fs.unlinkSync(SENTINEL)
+  } catch { /* no sentinel */ }
+  return false
+}
+
+function readStatus(): unknown {
+  try { return JSON.parse(fs.readFileSync(STATUS_PATH, 'utf-8')) } catch { return null }
+}
+
+function readLogTail(lines = 40): string {
+  try {
+    return fs.readFileSync(LOG_PATH, 'utf-8').split(/\r?\n/).slice(-lines).join('\n')
+  } catch { return '' }
+}
+
+// GET /api/pipeline/scrape — is the scraper running, and how did the last run end
 export async function GET() {
-  return NextResponse.json({ running: fs.existsSync(SENTINEL) })
+  return NextResponse.json({ running: isRunning(), status: readStatus(), log: readLogTail() })
 }
 
 export async function POST(req: NextRequest) {
@@ -22,10 +49,9 @@ export async function POST(req: NextRequest) {
     pages?: number
   }
 
-  // Resolve list of queries
   const queries: string[] = []
   if (body.queries?.length) {
-    queries.push(...body.queries.filter(q => q.trim()))
+    queries.push(...body.queries.map(q => String(q).trim()).filter(Boolean))
   } else if (body.query?.trim()) {
     queries.push(body.query.trim())
   }
@@ -34,53 +60,52 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'At least one search query is required.' }, { status: 400 })
   }
 
-  const script   = path.join(rootDir, 'pipeline', 'linkedin_scraper.py')
-  const merger   = path.join(rootDir, 'pipeline', 'merge_linkedin_results.py')
-
-  const flags: string[] = []
-  if (body.remote !== false)   flags.push('--remote')
-  if (body.easyApply !== false) flags.push('--easy-apply')
-  if (body.pages)               flags.push(`--pages ${body.pages}`)
-
-  // Sentinel: presence of this file means the scraper is running
-  const batLines: string[] = [
-    '@echo off',
-    `cd /d "${rootDir}"`,
-    `echo. > "${SENTINEL}"`,
-    'echo Running LinkedIn scraper...',
-    'echo.',
-  ]
-
-  if (queries.length === 1) {
-    batLines.push(`python "${script}" --query "${queries[0]}" ${flags.join(' ')}`)
-  } else {
-    queries.forEach((q, i) => {
-      const tmpOut = path.join(rootDir, 'jobs', `.tmp_results_${i}.md`)
-      batLines.push(`echo Searching: ${q}`)
-      batLines.push(`python "${script}" --query "${q}" ${flags.join(' ')} --output "${tmpOut}"`)
-      batLines.push('echo.')
-    })
-    const queryArgs = queries.map(q => `"${q}"`).join(' ')
-    batLines.push(`python "${merger}" ${queryArgs}`)
+  if (isRunning()) {
+    return NextResponse.json({ ok: false, error: 'The scraper is already running.' }, { status: 409 })
   }
 
-  batLines.push(
-    'echo.',
-    'echo Done! Results saved to jobs/linkedin_results.md.',
-    `del "${SENTINEL}" 2>nul`,
-    '',
-  )
+  fs.mkdirSync(JOBS_DIR, { recursive: true })
+  // Queries go in a JSON file, never on a command line, so titles with
+  // characters like & or quotes can't break the launcher.
+  fs.writeFileSync(SPEC_PATH, JSON.stringify({
+    queries,
+    remote: body.remote !== false,
+    easyApply: body.easyApply !== false,
+    pages: body.pages || undefined,
+  }, null, 2))
+  try { fs.unlinkSync(STATUS_PATH) } catch { /* none yet */ }
+  fs.writeFileSync(SENTINEL, new Date().toISOString())
 
-  const batPath = path.join(rootDir, '.scraper_launch.bat')
-  fs.writeFileSync(batPath, batLines.join('\r\n'))
+  const runner = path.join(rootDir, 'pipeline', 'run_scrape.py')
 
-  // /c closes the window when done (was /k which kept it open forever)
-  const proc = spawn(
-    'cmd.exe',
-    ['/c', 'start', 'cmd', '/c', batPath],
-    { detached: true, stdio: 'ignore', shell: false }
-  )
-  proc.unref()
+  try {
+    if (process.platform === 'win32') {
+      // Visible terminal, as before. run_scrape.py writes jobs/scraper_status.json
+      // and removes the sentinel however the run ends, and keeps the window open
+      // on failure so the error can be read.
+      const batPath = path.join(rootDir, '.scraper_launch.bat')
+      fs.writeFileSync(batPath, [
+        '@echo off',
+        `cd /d "${rootDir}"`,
+        `python "${runner}" --spec "${SPEC_PATH}"`,
+        '',
+      ].join('\r\n'))
+      const proc = spawn('cmd.exe', ['/c', 'start', '"Job Seeker scraper"', 'cmd', '/c', `"${batPath}"`], {
+        detached: true, stdio: 'ignore', shell: false, windowsVerbatimArguments: true,
+      })
+      proc.on('error', err => failLaunch(err))
+      proc.unref()
+    } else {
+      const proc = spawn('python3', [runner, '--spec', SPEC_PATH, '--no-pause'], {
+        cwd: rootDir, detached: true, stdio: 'ignore',
+      })
+      proc.on('error', err => failLaunch(err))
+      proc.unref()
+    }
+  } catch (err) {
+    failLaunch(err as Error)
+    return NextResponse.json({ ok: false, error: `Could not start the scraper: ${(err as Error).message}` }, { status: 500 })
+  }
 
   const label = queries.length === 1
     ? `"${queries[0]}"`
@@ -88,6 +113,18 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    message: `Scraper launched for ${label}. A Chrome window will open. Results will appear automatically when complete.`,
+    message: `Scraper launched for ${label}. Results will appear here when it finishes.`,
   })
+}
+
+// The process never started: record that, so the page doesn't wait forever.
+function failLaunch(err: Error) {
+  try { fs.unlinkSync(SENTINEL) } catch { /* ok */ }
+  try {
+    const now = new Date().toISOString()
+    fs.writeFileSync(STATUS_PATH, JSON.stringify({
+      state: 'failed', startedAt: now, finishedAt: now, queries: [],
+      message: `Could not start the scraper: ${err.message}. Is Python on PATH?`,
+    }, null, 2))
+  } catch { /* ok */ }
 }

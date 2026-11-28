@@ -104,12 +104,15 @@ async function processQueue() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const WATCH_PATHS = [
-  path.join(ROOT, 'jobs', 'application_tracker.csv'),
-  path.join(ROOT, 'jobs', 'application_qa.csv'),
-  path.join(ROOT, 'jobs', 'linkedin_results.md'),
-  path.join(ROOT, 'jobs', 'queue.json'),
-]
+const JOBS_DIR = path.join(ROOT, 'jobs')
+const WATCHED_FILES = new Set([
+  'application_tracker.csv',
+  'application_qa.csv',
+  'linkedin_results.md',
+  'queue.json',
+  // Written by pipeline/run_scrape.py when a scrape ends, however it ends
+  'scraper_status.json',
+])
 
 const app = next({ dev, dir: __dirname })
 const handle = app.getRequestHandler()
@@ -160,15 +163,24 @@ app.prepare().then(() => {
     ws.send(JSON.stringify({ type: 'connected' }))
   })
 
-  // File watchers
-  const watcher = chokidar.watch(WATCH_PATHS, {
+  // File watchers. Watch the jobs folder itself, not a list of file paths:
+  // chokidar loses track of a listed file that doesn't exist at startup or
+  // gets deleted (Clear results does that), and after that the page never
+  // hears that new results arrived.
+  fs.mkdirSync(JOBS_DIR, { recursive: true })
+  const watcher = chokidar.watch(JOBS_DIR, {
+    depth: 0,
     persistent: true,
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 50 },
   })
 
-  watcher.on('change', filePath => {
+  // 'add' matters as much as 'change': a watched file that was deleted
+  // (Clear results, or a run that replaces the status file) comes back as
+  // 'add', and the old handler ignored it, so the page never refreshed.
+  const onFileEvent = filePath => {
     const name = path.basename(filePath)
+    if (!WATCHED_FILES.has(name)) return
     if (name === 'application_tracker.csv') {
       broadcast({ type: 'tracker_updated' })
     } else if (name === 'application_qa.csv') {
@@ -178,13 +190,17 @@ app.prepare().then(() => {
     } else if (name === 'queue.json') {
       broadcast({ type: 'results_updated' })
       processQueue()
+    } else if (name === 'scraper_status.json') {
+      broadcast({ type: 'scrape_finished' })
     }
-  })
+  }
+  watcher.on('change', onFileEvent)
+  watcher.on('add', onFileEvent)
 
   server.listen(port, () => {
     console.log(`> Command Center ready on http://localhost:${port}`)
     console.log(`> WebSocket server on ws://localhost:${port}/ws`)
-    console.log(`> Watching ${WATCH_PATHS.length} files for changes`)
+    console.log(`> Watching ${JOBS_DIR} (${WATCHED_FILES.size} files) for changes`)
     if (!dev) console.log('> Running in production mode')
     // Process any pending queue items on startup
     setTimeout(() => processQueue(), 2000)
