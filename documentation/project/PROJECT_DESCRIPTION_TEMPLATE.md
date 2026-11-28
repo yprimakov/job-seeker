@@ -1,6 +1,6 @@
 # Project Description Template
 
-A unified structure for documenting development projects on yuryprimakov.com. Use this outline when writing or revising project long descriptions in the admin portal.
+A unified structure for documenting development projects on the owner's personal site. Use this outline when writing or revising project long descriptions in the admin portal.
 
 ---
 

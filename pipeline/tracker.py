@@ -15,7 +15,7 @@ Usage:
     python tracker.py question --q "What is your expected salary?" --context "People In AI Easy Apply"
 
     # Answer a recorded question
-    python tracker.py answer --id Q001 --answer "My target is $200K-$250K base"
+    python tracker.py answer --id Q001 --answer "My target is $XXXK-$YYYK base"
 
     # Show all pending (unanswered) questions
     python tracker.py pending

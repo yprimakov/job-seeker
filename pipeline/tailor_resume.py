@@ -131,7 +131,7 @@ TARGET JOB ANALYSIS:
 
 TAILORING RULES:
 1. Professional Summary: Rewrite to speak directly to this role. Mirror language from the JD. Lead with the most relevant experience. Keep to 3-4 sentences. No trailing punctuation artifacts.
-2. Technical Skills: Reorder skill categories so the most relevant to this JD appear first. Move JD-mentioned technologies to the top of their category. Do not add skills Yury doesn't have. End each skill line cleanly — no trailing punctuation or separators.
+2. Technical Skills: Reorder skill categories so the most relevant to this JD appear first. Move JD-mentioned technologies to the top of their category. Do not add skills the candidate doesn't have. End each skill line cleanly — no trailing punctuation or separators.
 3. Experience Bullets: Rewrite bullets to use JD keywords where genuinely applicable. Quantify impact where possible. Lead each bullet with a strong action verb. For {current_employer} especially — connect the candidate's independent work directly to what this role needs.
 4. Experience Order: Always keep chronological order but trim bullets in less relevant roles to 1-2 lines max.
 5. ATS Keywords: Naturally embed the top ATS keywords from the analysis into the summary, skills, and bullets. Never keyword-stuff — every keyword must be in context.

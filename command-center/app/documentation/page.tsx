@@ -128,7 +128,7 @@ python pipeline/tracker.py question \\
 python pipeline/tracker.py pending
 
 # Answer a question (stored for reuse across all applications)
-python pipeline/tracker.py answer --id Q001 --answer "Target is $200K-$250K"
+python pipeline/tracker.py answer --id Q001 --answer "Target is $XXXK-$YYYK"
 
 # Look up a previously answered question
 python pipeline/tracker.py lookup --q "salary expectations"
@@ -223,7 +223,7 @@ npm run build && npm start`}
           <h3 className="font-semibold mb-2">Environment variables</h3>
           <CodeBlock>{`# Required
 ANTHROPIC_API_KEY=sk-ant-...
-CANDIDATE_NAME=Yury Primakov
+CANDIDATE_NAME=Your Name
 CANDIDATE_EMAIL=you@gmail.com
 CANDIDATE_PHONE=555-555-5555
 CANDIDATE_LOCATION=City, State

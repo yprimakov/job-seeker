@@ -1,7 +1,7 @@
-# Design Reference — yuryprimakov.com
+# Design Reference — yoursite.example
 
 **Extracted:** 2026-03-17
-**Target:** Personal portfolio of Yury Primakov (Principal Full Stack Engineer)
+**Target:** Personal portfolio of the site owner (Principal Full Stack Engineer)
 
 ---
 
@@ -9,7 +9,7 @@
 
 A Next.js 13+ App Router portfolio built on Tailwind CSS v3.4.13, shadcn/ui, and custom JSX-styled components. The defining visual feature is an **ambient gradient background system** — three large blurred orbs positioned behind all content create a soft, diffused light environment that shifts dramatically between light and dark modes. Cards are glassmorphic (semi-transparent with `backdrop-filter: blur`), allowing the ambient light to bleed through.
 
-**Overall aesthetic:** Warm and atmospheric. The background orbs (blue/sky + orange/yellow + purple/indigo) make the page feel like it's lit from multiple soft sources. Cards float above this gradient as frosted glass panels. The accent color — `blue-500` (#3b82f6) — appears on the name "Primakov", the primary CTA button gradient, and badge gradients, providing a clear brand throughline without overwhelming the layout.
+**Overall aesthetic:** Warm and atmospheric. The background orbs (blue/sky + orange/yellow + purple/indigo) make the page feel like it's lit from multiple soft sources. Cards float above this gradient as frosted glass panels. The accent color — `blue-500` (#3b82f6) — appears on the the surname, the primary CTA button gradient, and badge gradients, providing a clear brand throughline without overwhelming the layout.
 
 **Bento grid layout:** Content is arranged in a resizable dashboard grid (React Grid Layout) rather than a linear scroll. Cards snap to a grid with rounded-3xl (24px) corners throughout.
 
@@ -19,7 +19,7 @@ A Next.js 13+ App Router portfolio built on Tailwind CSS v3.4.13, shadcn/ui, and
 
 ### Brand Accent
 
-`blue-500` — `#3b82f6` — used on: name "Primakov", primary button, skill badge gradients, card edge hover glow, "ALL SKILLS ↗" link.
+`blue-500` — `#3b82f6` — used on: the surname, primary button, skill badge gradients, card edge hover glow, "ALL SKILLS ↗" link.
 
 ### Design Token System (shadcn/ui default → Tailwind Slate)
 
@@ -327,7 +327,7 @@ Blue gradient lines appear on card edges on hover:
 
 ### Profile / Hero Card
 - Avatar: circular photo, `rounded-full`, `64-80px`
-- Name: `font-bold tracking-tight` — "Yury" in foreground, **"Primakov" in `blue-500`**
+- Name: `font-bold tracking-tight` — first name in foreground, **surname in `blue-500`**
 - Title: `uppercase tracking-wide text-xs font-semibold text-muted-fg` — "PRINCIPAL FULL STACK ENGINEER"
 - Bio: `text-sm text-muted-fg leading-relaxed`
 - Primary CTA: blue gradient button — `from-blue-400 via-blue-500 to-blue-600`
@@ -384,7 +384,7 @@ Blue gradient lines appear on card edges on hover:
 
 **Glassmorphism as structure:** Every content panel is frosted glass. The `1px` outer wrapper gap creates a rim light where background orbs bleed through as a subtle colored border — the detail most visitors feel but can't identify. The `rgba(107,33,168,0.3)` purple drop shadow ties all cards to the ambient palette.
 
-**Blue as the single brand color:** `blue-500` (#3b82f6) appears exactly where attention should land — the surname "Primakov", the primary CTA, the card edge hover glow, and skill badge gradients. Everything else is neutral slate. This restraint makes every blue hit land hard.
+**Blue as the single brand color:** `blue-500` (#3b82f6) appears exactly where attention should land — the surname, the primary CTA, the card edge hover glow, and skill badge gradients. Everything else is neutral slate. This restraint makes every blue hit land hard.
 
 **Opacity hierarchy in the experience list:** Active/current role at full opacity; all past roles dimmed to 45%. A single CSS rule communicates seniority, recency, and focus simultaneously — no badges, no labels needed.
 

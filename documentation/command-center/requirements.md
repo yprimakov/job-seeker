@@ -25,7 +25,7 @@ the command center is a UI layer on top of them.
 
 ## Design System & Branding
 
-The command center must match the visual identity of `yuryprimakov.com` exactly.
+The command center must match the visual identity of the owner's personal site exactly.
 All design tokens, components, and motion behaviour are derived from
 `brand/design_guide/` and `brand/assets/`.
 
