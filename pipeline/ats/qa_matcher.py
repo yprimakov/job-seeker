@@ -20,7 +20,7 @@ Usage:
 
     matched, unmatched = match_questions(discovered_questions)
     # matched   → {"question_123": "7", ...}  — ready for fill_script(extra_fields=)
-    # unmatched → [{"id": ..., "label": ...}] — needs Yury's input
+    # unmatched → [{"id": ..., "label": ...}] — needs the user's input
 """
 
 import csv

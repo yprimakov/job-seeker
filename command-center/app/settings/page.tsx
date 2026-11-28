@@ -108,7 +108,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <div>
                 <label className={labelClass}>Full Name</label>
-                <input className={inputClass} {...field('CANDIDATE_NAME')} placeholder="Yury Primakov" />
+                <input className={inputClass} {...field('CANDIDATE_NAME')} placeholder="Jane Smith" />
               </div>
               <div>
                 <label className={labelClass}>Job Title</label>
@@ -124,11 +124,11 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className={labelClass}>Location</label>
-                <input className={inputClass} {...field('CANDIDATE_LOCATION')} placeholder="Holmdel, NJ" />
+                <input className={inputClass} {...field('CANDIDATE_LOCATION')} placeholder="Austin, TX" />
               </div>
               <div>
                 <label className={labelClass}>Website</label>
-                <input className={inputClass} {...field('CANDIDATE_WEBSITE')} placeholder="yuryprimakov.com" />
+                <input className={inputClass} {...field('CANDIDATE_WEBSITE')} placeholder="yoursite.example" />
               </div>
             </div>
           </div>

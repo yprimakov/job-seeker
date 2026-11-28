@@ -1,12 +1,12 @@
 {
   // ============================================================
-  // yuryprimakov.com — Design Token Architecture
+  // yoursite.example — Design Token Architecture
   // Extracted: 2026-03-17
   // Framework: Tailwind CSS v3.4.13 + shadcn/ui default theme
   // ============================================================
 
   "meta": {
-    "site": "yuryprimakov.com",
+    "site": "yoursite.example",
     "framework": "Next.js 13+ App Router",
     "cssFramework": "Tailwind CSS v3.4.13",
     "componentLibrary": "shadcn/ui (default theme)",
@@ -513,11 +513,11 @@
 
     "hero": {
       "layout": "flex flex-col items-center text-center", // UNVERIFIED
-      "nameColor": "#3b82f6",  // blue-500 — 'Primakov' rendered in accent blue
+      "nameColor": "#3b82f6",  // blue-500 — surname rendered in accent blue
       "profileImage": {
         "size": "256×256px",
         "shape": "rounded-full",
-        "src": "/_next/static/media/profile-yury.14257e95.png"
+        "src": "/_next/static/media/profile.png"
       },
       "primaryCTA": "Resume (Google Drive link)",
       "socials": ["GitHub", "CodePen", "LinkedIn", "Contact"]

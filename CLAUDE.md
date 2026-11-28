@@ -2,10 +2,10 @@
 
 ## What We're Doing
 
-Yury Primakov (Principal AI Engineer, Holmdel NJ) is actively job hunting. This project is a full AI-assisted job search pipeline. The goal is to:
+This project is a full AI-assisted job search pipeline for one candidate. Who the candidate is (name, title, location, website, preferences) lives in `CLAUDE.local.md`, which is gitignored and imported below. If that file is missing, copy `CLAUDE.local.example.md` to `CLAUDE.local.md` and fill it in, or ask the user for the details. Never write the candidate's personal details into a tracked file. The goal is to:
 
-1. **Find relevant jobs** on LinkedIn (remote or within 30 min of Holmdel, NJ; Easy Apply priority)
-2. **Tailor his resume** to each job description using Claude API
+1. **Find relevant jobs** on LinkedIn (remote or within commuting distance of the candidate's home location; Easy Apply priority)
+2. **Tailor the candidate's resume** to each job description using Claude API
 3. **Track every application** in a spreadsheet, including questions encountered
 4. **Preview files remotely** via here.now (permanent links) or Google Drive
 
@@ -13,17 +13,18 @@ Yury Primakov (Principal AI Engineer, Holmdel NJ) is actively job hunting. This 
 
 ## Candidate Profile
 
-- **Name:** Yury Primakov
-- **Title:** Principal AI Engineer
-- **Location:** Holmdel, NJ
+Personal details are kept out of git:
+
+@CLAUDE.local.md
+
+- **Name, title, location, website:** from `CLAUDE.local.md` (gitignored; template in `CLAUDE.local.example.md`)
 - **Email and phone:** from `.env` (`CANDIDATE_EMAIL_BASE`, `CANDIDATE_EMAIL_DOMAIN`, `CANDIDATE_PHONE`), never committed
-- **Website:** yuryprimakov.com
 - **Experience:** 15+ years full-stack engineering, now specializing in applied AI
 - **Core strengths:** LLM integration, RAG systems, autonomous AI agents, agentic workflows, Python/FastAPI, Next.js/React, Docker/Kubernetes, C#/.NET
 - **AI tools:** Claude API, OpenAI API, Gemini API, Ollama, n8n, Pinecone, Hugging Face, LangChain
 
 ### Job Search Preferences
-- **Location:** Remote OR within ~30 minutes drive from Holmdel, NJ
+- **Location:** Remote OR within ~30 minutes drive from the candidate's home location (see `CLAUDE.local.md`)
 - **Priority filter:** Easy Apply on LinkedIn
 - **Target roles:** Principal AI Engineer, Staff AI Engineer, Senior AI Engineer, AI Solutions Architect, AI/ML Engineer, Full Stack AI Engineer
 - **Not interested in:** Mainframe, legacy enterprise without AI component
@@ -109,11 +110,11 @@ python pipeline/tracker.py log --company "People In AI" --title "Principal AI En
 python pipeline/tracker.py question --q "What is your expected salary?" \
     --context "People In AI Easy Apply"
 
-# Show all unanswered questions (ask Yury for answers)
+# Show all unanswered questions (ask the user for answers)
 python pipeline/tracker.py pending
 
 # Answer a question (stored for future reuse across all applications)
-python pipeline/tracker.py answer --id Q001 --answer "My target is $200K-$250K base"
+python pipeline/tracker.py answer --id Q001 --answer "My target is $XXXK-$YYYK base"
 
 # Look up if a similar question was answered before
 python pipeline/tracker.py lookup --q "salary expectations"
@@ -149,7 +150,7 @@ The base resume (`pipeline/resume_base.md`) and all tailored outputs must follow
 
 ### here.now (temporary public links)
 - Account: see `~/.herenow/credentials` (API key lives there)
-- **Default: always use `--ttl 86400` (expires in 24 hours).** Only omit `--ttl` if Yury explicitly asks for a permanent link.
+- **Default: always use `--ttl 86400` (expires in 24 hours).** Only omit `--ttl` if the user explicitly asks for a permanent link.
 - Publish (default — 24hr expiry):
   ```bash
   bash ~/.agents/skills/here-now/scripts/publish.sh "/unix/path/to/file" --ttl 86400 --client claude-code
@@ -205,9 +206,9 @@ See `documentation/command-center/improvements.md` for the full Command Center b
 
 ## Notes & Preferences
 
-- Yury prefers **concise responses** — no filler, no summaries of what was just done
+- The user prefers **concise responses** — no filler, no summaries of what was just done
 - All file previews go via **here.now** (public, permanent) or **Google Drive** (private)
-- The Q&A system in `tracker.py` is the memory for application questions — always check it before asking Yury for an answer
-- When a question comes up during an application that isn't in the Q&A database, flag it to Yury and store his answer immediately
+- The Q&A system in `tracker.py` is the memory for application questions — always check it before asking the user for an answer
+- When a question comes up during an application that isn't in the Q&A database, flag it to the user and store their answer immediately
 - Do not apply to jobs without generating a tailored resume first
 - When asked to run the pipeline and submit applications, treat that as explicit confirmation to submit
